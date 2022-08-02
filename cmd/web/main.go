@@ -16,16 +16,20 @@ const portNumber = ":3030"
 
 func main() {
 	var app config.AppConfig
+	app.UseCache = false
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatal("cannot load templates")
 	}
 	app.TemplateCache = tc
 
+	repo := handlers.NewRepo(&app)
+	handlers.NewHandlers(repo)
+
 	render.NewTemplates(&app)
 
-	http.HandleFunc("/", handlers.Home)
-	http.HandleFunc("/about", handlers.About)
+	http.HandleFunc("/", handlers.Repo.Home)
+	http.HandleFunc("/about", handlers.Repo.About)
 
 	/*http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		n, err := fmt.Fprintf(w, "hello world !<div>ok</div>")
