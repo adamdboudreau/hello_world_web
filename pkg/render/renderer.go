@@ -6,30 +6,39 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/adamdboudreau/hello-world-web/pkg/config"
 )
+
+var app *config.AppConfig
+
+// NewTemplates sets config for template
+func NewTemplates(a *config.AppConfig) {
+	app = a
+}
 
 // RenderTemplate renders templates
 func RenderTemplate(w http.ResponseWriter, tmpl string) {
+	// get template cache from app config
+	tc := app.TemplateCache
 	// create template cache
-	tc, err := createTemplateCache()
+	/*tc, err := CreateTemplateCache()
 	if err != nil {
 		log.Fatal(err)
-	}
+	} */
 	// get requested template from cache
 	t, ok := tc[tmpl]
 	if !ok {
-		log.Fatal(err)
+		log.Fatal("could not get template from cache")
 	}
 	buf := new(bytes.Buffer)
 
-	err = t.Execute(buf, nil)
-	if err != nil {
-		log.Println(err)
-	}
+	_ = t.Execute(buf, nil)
+
 	// render template
-	_, err = buf.WriteTo(w)
+	_, err := buf.WriteTo(w)
 	if err != nil {
-		log.Println(err)
+		log.Println("error writing template to browser", err)
 	}
 
 	// read from disc each request
@@ -41,7 +50,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string) {
 	} */
 }
 
-func createTemplateCache() (map[string]*template.Template, error) {
+func CreateTemplateCache() (map[string]*template.Template, error) {
 	//myCache := make(map[string]*template.Template)
 	myCache := map[string]*template.Template{}
 
