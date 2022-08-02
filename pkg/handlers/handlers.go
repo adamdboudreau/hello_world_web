@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/adamdboudreau/hello-world-web/pkg/config"
+	"github.com/adamdboudreau/hello-world-web/pkg/models"
 	"github.com/adamdboudreau/hello-world-web/pkg/render"
 )
 
@@ -30,10 +31,16 @@ func NewHandlers(r *Repository) {
 
 // add receiver to functions to allow access to repo
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "home.page.tmpl")
+	render.RenderTemplate(w, "home.page.tmpl", &models.TemplateData{})
 }
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, "about.page.tmpl")
+	// perform logic
+	stringMap := make(map[string]string)
+	stringMap["test"] = "hello again."
+	// send data to template
+	render.RenderTemplate(w, "about.page.tmpl", &models.TemplateData{
+		StringMap: stringMap,
+	})
 }
 
 /*
