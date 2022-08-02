@@ -1,23 +1,79 @@
 package render
 
 import (
-	"fmt"
+	"bytes"
 	"html/template"
 	"log"
 	"net/http"
+	"path/filepath"
 )
 
 // RenderTemplate renders templates
-func RenderTemplateFirstTest(w http.ResponseWriter, tmpl string) {
+func RenderTemplate(w http.ResponseWriter, tmpl string) {
+	// create template cache
+	tc, err := createTemplateCache()
+	if err != nil {
+		log.Fatal(err)
+	}
+	// get requested template from cache
+	t, ok := tc[tmpl]
+	if !ok {
+		log.Fatal(err)
+	}
+	buf := new(bytes.Buffer)
+
+	err = t.Execute(buf, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	// render template
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		log.Println(err)
+	}
+
 	// read from disc each request
-	parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.layout.tmpl")
+	/* parsedTemplate, _ := template.ParseFiles("./templates/"+tmpl, "./templates/base.layout.tmpl")
 	err := parsedTemplate.Execute(w, nil)
 	if err != nil {
 		fmt.Println("error parsing template:", err)
 		return
-	}
+	} */
 }
 
+func createTemplateCache() (map[string]*template.Template, error) {
+	//myCache := make(map[string]*template.Template)
+	myCache := map[string]*template.Template{}
+
+	// get all files named *.page.tmpl from ./templates
+	pages, err := filepath.Glob("./templates/*.page.tmpl")
+	if err != nil {
+		return myCache, err
+	}
+
+	// range through all files with page.tmpl
+	for _, page := range pages {
+		name := filepath.Base(page) // file.page.tmpl
+		ts, err := template.New(name).ParseFiles(page)
+		if err != nil {
+			return myCache, err
+		}
+		matches, err := filepath.Glob("./templates/*.layout.tmpl")
+		if len(matches) > 0 {
+			// add any templates to the parsed page
+			ts, err = ts.ParseGlob("./templates/*.layout.tmpl")
+			if err != nil {
+				return myCache, err
+			}
+		}
+
+		myCache[name] = ts
+	}
+
+	return myCache, nil
+}
+
+/* initial template cache setup
 var tc = make(map[string]*template.Template)
 
 func RenderTemplate(w http.ResponseWriter, t string) {
@@ -57,3 +113,4 @@ func createTemplateCache(t string) error {
 	tc[t] = tmpl
 	return nil
 }
+*/
