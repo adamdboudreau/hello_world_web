@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/adamdboudreau/hello-world-web/pkg/config"
-	"github.com/adamdboudreau/hello-world-web/pkg/models"
+	"hello_world_web/pkg/config"
+	"hello_world_web/pkg/models"
 )
 
 var app *config.AppConfig

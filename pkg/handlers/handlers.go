@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/adamdboudreau/hello-world-web/pkg/config"
-	"github.com/adamdboudreau/hello-world-web/pkg/models"
-	"github.com/adamdboudreau/hello-world-web/pkg/render"
+	"hello_world_web/pkg/config"
+	"hello_world_web/pkg/models"
+	"hello_world_web/pkg/render"
 )
 
 // repository pattern - allow us to swap out components of site with little changes to the code that uses it
@@ -31,12 +31,19 @@ func NewHandlers(r *Repository) {
 
 // add receiver to functions to allow access to repo
 func (m *Repository) Home(w http.ResponseWriter, r *http.Request) {
+	remoteIP := r.RemoteAddr
+	m.App.Session.Put(r.Context(), "remote_ip", remoteIP)
+
 	render.RenderTemplate(w, "home.page.tmpl", &models.TemplateData{})
 }
 func (m *Repository) About(w http.ResponseWriter, r *http.Request) {
 	// perform logic
 	stringMap := make(map[string]string)
 	stringMap["test"] = "hello again."
+
+	remoteIP := m.App.Session.GetString(r.Context(), "remote_ip")
+	stringMap["remote_ip"] = remoteIP
+
 	// send data to template
 	render.RenderTemplate(w, "about.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
